@@ -1,11 +1,15 @@
+from timm.models.layers import config
 import torch
 import glob
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 from PIL import Image
 import torch.utils.data.distributed as dist
+import utils
+
 
 class ImageDataLoader(Dataset):
+    
     def __init__(self,dir,images,transform):
         self.images=images
         self.transform=transform
@@ -35,6 +39,7 @@ class ImageDataLoader(Dataset):
         return image, label
 
 def data_loader():
+    config=utils.read_conf('/home/minhwan/cifar100/conf.json')
     stats=((0.507,0.487,0.441),(0.267,0.256,0.276))
     train_trans=transforms.Compose([transforms.RandomCrop(32,padding=4,padding_mode='reflect'),
                             transforms.RandomHorizontalFlip(),
@@ -43,16 +48,16 @@ def data_loader():
                             ])
     valid_trans=transforms.Compose([transforms.ToTensor(),transforms.Normalize(*stats)])
 
-    trainimages=glob.glob('/home/minhwan/cifar100/dataset/CIFAR100/TRAIN/*/*.png')
-    traindir=glob.glob('/home/minhwan/cifar100/dataset/CIFAR100/TRAIN/*')
+    trainimages=glob.glob(config["dataset"]+'TRAIN/*/*.png')
+    traindir=glob.glob(config["dataset"]+'TRAIN/*')
 
-    testimages=glob.glob('/home/minhwan/cifar100/dataset/CIFAR100/TEST/*/*.png')
-    testdir=glob.glob('/home/minhwan/cifar100/dataset/CIFAR100/TEST/*')
+    testimages=glob.glob(config["dataset"]+'TEST/*/*.png')
+    testdir=glob.glob(config["dataset"]+'TEST/*')
 
     trainset=ImageDataLoader(traindir,trainimages,train_trans)
     testset=ImageDataLoader(testdir,testimages,valid_trans)
 
-    batch_size=100
+    batch_size=int(config["batch_size"])
 
     trainloader=torch.utils.data.DataLoader(trainset,batch_size=batch_size,shuffle=True,num_workers=8)
     testloader=torch.utils.data.DataLoader(testset,batch_size=batch_size,shuffle=False,num_workers=8)

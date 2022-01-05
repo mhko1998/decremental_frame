@@ -5,7 +5,7 @@ from tqdm import tqdm
 import getoptim
 
 def train(net,trainloader,optimizer,criterion,device,epoch):
-    
+        
     net.train()
     running_loss=0.0
     total=0
