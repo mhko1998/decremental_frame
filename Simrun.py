@@ -39,7 +39,9 @@ def Simrun():
         scheduler.step()
 
         if epoch % 5 == 0:
-            valloss,valacc=training.test(net,testloader,criterion,device)
+            net1=getnet.reduceNet(net)
+            net1.to(device)
+            valloss,valacc=training.test(net1,testloader,criterion,device)
             run['val/loss'].log(valloss)
             run['val/acc'].log(valacc)
             if valacc > maxacc:
