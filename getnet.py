@@ -1,3 +1,4 @@
+from os import confstr
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -16,11 +17,18 @@ class Net(nn.Module):
     def forward(self,xb):
         return self.network(xb)
 
+class reduceNet(nn.Module):
+    def __init__(self,net):
+        super().__init__()
+        self.network=net
+        num_ftrs=self.network.network.fc.in_features
+        self.network.network.fc=nn.Linear(num_ftrs,100)
+        
+    def forward(self,xb):
+        return self.network(xb)
+
 if __name__=="__main__":
     model=Net()
-    dummy_size=(3,256,256)
-    macs, params= get_model_complexity_info(model, dummy_size,as_strings=True,
-    print_per_layer_stat=True,verbose=True)
-    print('computational complexity: ', macs)
-    print('number of parameters: ',params)
-    
+    # print(model)
+    model1=reduceNet(model)
+    print(model1)
