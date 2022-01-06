@@ -1,12 +1,9 @@
-from timm.models.layers import config
 import torch
 import glob
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 from PIL import Image
-import torch.utils.data.distributed as dist
 import utils
-
 
 class ImageDataLoader(Dataset):
     
@@ -38,6 +35,27 @@ class ImageDataLoader(Dataset):
         image=self.transform(image)
         return image, label
 
+class ReduceImageDataLoader(ImageDataLoader):
+    def __init__(self,dir,images,transform,numclass):
+        super().__init__(dir,images,transform)
+        for i in enumerate(images):
+            x=images[i].split('/')[-2]
+            label_dict,_=super().__labeling__()
+            label=label_dict[x]
+            if label<self.numclass:
+                self.image=images
+    def __len__(self):
+        return len(self.images)
+    def __getitem__(self, index):
+        imgname=self.images[index]
+        x=imgname.split('/')[-2]
+        label_dict, _=super().__labeling__()
+        label=label_dict[x]
+        image=Image.open(imgname)
+        image=self.transform(image)
+        return image, label
+     
+
 def data_loader():
     config=utils.read_conf('/home/minhwan/cifar100/conf.json')
     stats=((0.507,0.487,0.441),(0.267,0.256,0.276))
@@ -55,7 +73,8 @@ def data_loader():
     testdir=glob.glob(config["dataset"]+'TEST/*')
 
     trainset=ImageDataLoader(traindir,trainimages,train_trans)
-    testset=ImageDataLoader(testdir,testimages,valid_trans)
+    testset=ReduceImageDataLoader(testdir,testimages,valid_trans,20)
+    
 
     batch_size=int(config["batch_size"])
 
@@ -63,3 +82,7 @@ def data_loader():
     testloader=torch.utils.data.DataLoader(testset,batch_size=batch_size,shuffle=False,num_workers=8)
 
     return trainloader, testloader
+
+if __name__=="__main__":
+    a,b=data_loader()
+    print(len(a),len(b))
