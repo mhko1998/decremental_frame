@@ -1,0 +1,7 @@
+{
+    "epoch":"90",
+    "dataset":"/home/minhwan/cifar100/dataset/CIFAR100/",
+    "batch_size":100,
+    "save_path":"/home/minhwan/cifar100/modelstate/",
+    "num_classes":100
+}
