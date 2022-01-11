@@ -62,9 +62,9 @@ def finetune():
             run['val/loss'].log(valloss)
             run['val/acc'].log(valacc)
             if valacc > maxacc:
-                if os.path.exists(config["save_path"]+'cifar-resnet34-'+str(current_epoch)+'.pt'):
-                    os.remove(config["save_path"]+'cifar-resnet34-'+str(current_epoch)+'.pt')
-                torch.save(net.state_dict(),config["save_path"]+'cifar-resnet34-'+str(epoch)+'.pt')
+                if os.path.exists(config["save_path"]+'cifar-resnet34fine-'+str(current_epoch)+'.pt'):
+                    os.remove(config["save_path"]+'cifar-resnet34fine-'+str(current_epoch)+'.pt')
+                torch.save(net1.state_dict(),config["save_path"]+'cifar-resnet34fine-'+str(epoch)+'.pt')
                 current_epoch=epoch
     print('Fininshed Training')
 
