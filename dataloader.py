@@ -38,23 +38,15 @@ class ImageDataLoader(Dataset):
 class ReduceImageDataLoader(ImageDataLoader):
     def __init__(self,dir,images,transform,numclass):
         super().__init__(dir,images,transform)
-        for i in enumerate(images):
-            x=images[i].split('/')[-2]
-            label_dict,_=super().__labeling__()
-            label=label_dict[x]
+        self.numclass=numclass
+        img=[]
+        for img_file in images:
+            x=img_file.split('/')[-2]
+            label=self.label_dict[x]
+            # print(label, self.numclass)
             if label<self.numclass:
-                self.image=images
-    def __len__(self):
-        return len(self.images)
-    def __getitem__(self, index):
-        imgname=self.images[index]
-        x=imgname.split('/')[-2]
-        label_dict, _=super().__labeling__()
-        label=label_dict[x]
-        image=Image.open(imgname)
-        image=self.transform(image)
-        return image, label
-     
+                img.append(img_file)
+                self.images=img
 
 def data_loader():
     config=utils.read_conf('/home/minhwan/cifar100/conf.json')
@@ -72,10 +64,9 @@ def data_loader():
     testimages=glob.glob(config["dataset"]+'TEST/*/*.png')
     testdir=glob.glob(config["dataset"]+'TEST/*')
 
-    trainset=ImageDataLoader(traindir,trainimages,train_trans)
+    trainset=ReduceImageDataLoader(traindir,trainimages,train_trans,20)
     testset=ReduceImageDataLoader(testdir,testimages,valid_trans,20)
     
-
     batch_size=int(config["batch_size"])
 
     trainloader=torch.utils.data.DataLoader(trainset,batch_size=batch_size,shuffle=True,num_workers=8)
